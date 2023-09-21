@@ -20,7 +20,6 @@ struct RemoteImage: View {
         if let image = image {
             Image(uiImage: image)
                 .resizable()
-                .scaledToFill()
         } else {
             Text("Loading...").frame(width: 40)
                 .onAppear {
@@ -93,12 +92,12 @@ struct ContentView: View {
                                 ForEach(viewModel.banner, id: \.self) { item in
                                     GeometryReader { geometry in
                                         RemoteImage(url: URL(string: item.bannerURL ?? "")!)
-                                            .scaledToFill()
-                                            .frame(width: UIScreen.main.bounds.width - 40)
+                                            .frame(width: UIScreen.main.bounds.width)
                                             .clipped()
                                     }
                                     .cornerRadius(5)
-                                    .frame(width: UIScreen.main.bounds.width - 30)
+                                    .frame(width: UIScreen.main.bounds.width - 50)
+                                                        .contentShape(Rectangle())
                                 }
                             }
                             .padding(10)
@@ -201,7 +200,7 @@ struct ProductsView: View {
                    
                 }.padding(.top, 10).opacity(offer > 0 ? 1 : 0)
                 
-                RemoteImage(url: URL(string: image)!).frame(width: 92, height: 92)
+                RemoteImage(url: URL(string: image)!).frame(width: 92, height: 92).scaledToFill()
                 
                 HStack{
                     ZStack{
@@ -270,7 +269,7 @@ struct CategoriesView: View {
         VStack {
             ZStack{
                 Circle().fill(Color.cyan)
-                RemoteImage(url: URL(string: image)!).frame(width: 48, height: 48)
+                RemoteImage(url: URL(string: image)!).frame(width: 48, height: 48).scaledToFill()
             }.frame(width: UIScreen.main.bounds.width / 1.8, height: 60)
             
             Text(text)
