@@ -7,6 +7,126 @@
 
 import SwiftUI
 
+struct ContentView: View {
+    
+    @StateObject var viewModel = ViewModel()
+    @State private var searchText = ""
+    @State private var selectedTab = 0
+    
+    var body: some View {
+        NavigationView{
+            TabView(selection: $selectedTab) {
+                
+                ScrollView{
+                    VStack(alignment: .leading){
+                        VStack{
+                            
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.gray)
+                                
+                                TextField("Search", text: $searchText)
+                                
+                                Image(systemName: "barcode.viewfinder")
+                                    .foregroundColor(.gray)
+                                    .onTapGesture {
+                                    }
+                            }
+                            .frame(height: 47)
+                            .background(Color(UIColor(red: 250/255, green: 250/255, blue: 250/255, alpha: 1)))
+                            .padding([.leading, .trailing],10)
+                            .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.gray, lineWidth: 1))
+                            
+                            
+                        }.padding([.leading, .trailing],10)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack(spacing: 10) {
+                                ForEach(viewModel.categories, id: \.self) { item in
+                                    CategoriesView(text: item.name ?? "", image: item.imageURL ?? "")
+                                        .frame(width: UIScreen.main.bounds.width / 5)
+                                }
+                            }.padding([.leading,.trailing],10)
+                        }.frame(height: 100)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack(spacing: 10) {
+                                ForEach(viewModel.banner, id: \.self) { item in
+                                    GeometryReader { geometry in
+                                        RemoteImage(url: URL(string: item.bannerURL ?? "")!)
+                                            .frame(width: UIScreen.main.bounds.width)
+                                            .clipped()
+                                    }
+                                    .cornerRadius(5)
+                                    .frame(width: UIScreen.main.bounds.width - 50)
+                                                        .contentShape(Rectangle())
+                                }
+                            }
+                            .padding(10)
+                            .frame(height: 200)
+
+                        }
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack(spacing: 10) {
+                                ForEach(viewModel.products, id: \.self) { item in
+                                    ProductsView(image: item.image ?? "", express: item.isExpress ?? false, offer: item.offer ?? 0, realPrice: item.actualPrice ?? "", offerPrice: item.offerPrice ?? "", name: item.name ?? "")
+                                }
+                            }.padding(10)
+                        }
+                        .frame(height: 322)
+                        
+                    }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+                        
+                }.tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Home")
+                }
+                .tag(0)
+                
+                Text("Categories")
+                    .tabItem {
+                        Image(systemName: "menubar.rectangle")
+                        Text("Categories")
+                    }
+                    .tag(1)
+
+                Text("Offers")
+                    .tabItem {
+                        Image(systemName: "percent")
+                        Text("Offers")
+                    }
+                    .tag(2)
+
+                Text("Cart")
+                    .tabItem {
+                        Image(systemName: "cart")
+                        Text("Cart")
+                    }
+                    .badge(2)
+                    .tag(3)
+
+                Text("Account")
+                    .tabItem {
+                        Image(systemName: "person.crop.circle")
+                        Text("Account")
+                    }
+                    .tag(4)
+                 
+            }
+            
+        }.onAppear{
+            let tabBarAppearance = UITabBarAppearance()
+            tabBarAppearance.shadowColor = .black
+            tabBarAppearance.backgroundColor = .white
+            tabBarAppearance.stackedItemPositioning = .centered
+            UITabBar.appearance().standardAppearance = tabBarAppearance
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+            viewModel.fetch()
+        }
+        
+    }
+}
 
 struct RemoteImage: View {
     let url: URL
@@ -46,124 +166,21 @@ struct RemoteImage: View {
     }
 }
 
-
-struct ContentView: View {
-    
-    @StateObject var viewModel = ViewModel()
-    @State private var searchText = ""
-    @State private var selectedTab = 0
-    
-    
+struct CategoriesView: View {
+    let text: String
+    let image:String
     
     var body: some View {
-        NavigationView{
-            TabView(selection: $selectedTab) {
-                ScrollView{
-                    VStack(alignment: .leading){
-                        VStack{
-                            HStack {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.gray)
-                                
-                                TextField("Search", text: $searchText)
-                                
-                                Image(systemName: "barcode.viewfinder")
-                                    .foregroundColor(.gray)
-                                    .onTapGesture {
-                                    }
-                            }
-                            .frame(height: 47)
-                            .background(Color(UIColor(red: 250/255, green: 250/255, blue: 250/255, alpha: 1)))
-                            .padding([.leading, .trailing],10)
-                            .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.gray, lineWidth: 1))
-                            
-                            
-                        }.padding([.leading, .trailing],10)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            LazyHStack(spacing: 10) {
-                                ForEach(viewModel.categories, id: \.self) { item in
-                                    CategoriesView(text: item.name ?? "", image: item.imageURL ?? "")
-                                        .frame(width: UIScreen.main.bounds.width / 5)
-                                }
-                            }.padding([.leading,.trailing],10)
-                        }.frame(height: 100)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            LazyHStack(spacing: 10) {
-                                ForEach(viewModel.banner, id: \.self) { item in
-                                    GeometryReader { geometry in
-                                        RemoteImage(url: URL(string: item.bannerURL ?? "")!)
-                                            .frame(width: UIScreen.main.bounds.width)
-                                            .clipped()
-                                    }
-                                    .cornerRadius(5)
-                                    .frame(width: UIScreen.main.bounds.width - 50)
-                                                        .contentShape(Rectangle())
-                                }
-                            }
-                            .padding(10)
-                            .frame(height: 200)
-
-                        }
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            LazyHStack(spacing: 10) {
-                                ForEach(viewModel.products, id: \.self) { item in
-                                    ProductsView(image: item.image ?? "", express: item.isExpress ?? false, offer: item.offer ?? 0, realPrice: item.actualPrice ?? "", offerPrice: item.offerPrice ?? "", name: item.name ?? "")
-                                }
-                            }.padding(10)
-                        }
-                        .frame(height: 322)
-                    }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
-                        
-                }.tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Home")
-                }
-                .tag(0)
-                
-                Text("Categories")
-                    .tabItem {
-                        Image(systemName: "menubar.rectangle")
-                        Text("Categories")
-                    }
-                    .tag(1)
-
-                
-                Text("Offers")
-                    .tabItem {
-                        Image(systemName: "percent")
-                        Text("Offers")
-                    }
-                    .tag(2)
-
-                
-                Text("Cart")
-                    .tabItem {
-                        Image(systemName: "cart")
-                        Text("Cart")
-                    }
-                    .badge(2)
-                    .tag(3)
-
-                
-                Text("Account")
-                    .tabItem {
-                        Image(systemName: "person.crop.circle")
-                        Text("Account")
-                    }
-                    .tag(4)
-                 
-            }
+        VStack {
+            ZStack{
+                Circle().fill(Color.cyan)
+                RemoteImage(url: URL(string: image)!).frame(width: 48, height: 48).scaledToFill()
+            }.frame(width: UIScreen.main.bounds.width / 1.8, height: 60)
             
-        }.onAppear{
-            let tabBarAppearance = UITabBarAppearance()
-            tabBarAppearance.shadowColor = .black
-            tabBarAppearance.backgroundColor = .white
-            tabBarAppearance.stackedItemPositioning = .centered
-            UITabBar.appearance().standardAppearance = tabBarAppearance
-            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-            viewModel.fetch()
+            Text(text)
+                .foregroundColor(.black)
+                .font(.caption)
         }
-        
     }
 }
 
@@ -176,7 +193,6 @@ struct ProductsView: View {
     let name: String
         
     var body: some View {
-        
             VStack {
                 HStack {
                     ZStack(alignment: .trailing) {
@@ -189,16 +205,13 @@ struct ProductsView: View {
                             .font(.caption)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 5)
-                        
-                       
                     }
-                    .frame(width: 60)
+                    .frame(width: 70)
+                    .opacity(offer > 0 ? 1 : 0)
                     Spacer()
                     Image("heart")
                         .frame(width: 30, height: 30).padding(.trailing,5)
-                    
-                   
-                }.padding(.top, 10).opacity(offer > 0 ? 1 : 0)
+                }.padding(.top, 10)
                 
                 RemoteImage(url: URL(string: image)!).frame(width: 92, height: 92).scaledToFill()
                 
@@ -219,6 +232,7 @@ struct ProductsView: View {
                     .padding(.leading, 5)
                     .strikethrough(true, color: .gray)
                     .opacity(offer > 0 ? 1 : 0)
+                
                 Text(offerPrice)
                     .foregroundColor(.black)
                     .font(.headline)
@@ -254,31 +268,10 @@ struct ProductsView: View {
                 
             }
             .frame(width: UIScreen.main.bounds.width / 2.5, height: 320)
-            
             .background(Color.white)
             .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.gray, lineWidth: 1))
     }
 }
-
-
-struct CategoriesView: View {
-    let text: String
-    let image:String
-    
-    var body: some View {
-        VStack {
-            ZStack{
-                Circle().fill(Color.cyan)
-                RemoteImage(url: URL(string: image)!).frame(width: 48, height: 48).scaledToFill()
-            }.frame(width: UIScreen.main.bounds.width / 1.8, height: 60)
-            
-            Text(text)
-                .foregroundColor(.black)
-                .font(.caption)
-        }
-    }
-}
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
